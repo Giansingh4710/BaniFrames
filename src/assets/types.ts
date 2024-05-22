@@ -29,6 +29,33 @@ enum BaniPartitionKey {
   akalustat = "akalustat",
 }
 
+interface BaniInfo {
+  ID: number;
+  token: string;
+  gurmukhi: string;
+  gurmukhiUni: string;
+  transliteration: string;
+  transliterations: {
+    english: string;
+    hindi: string;
+    en: string;
+    hi: string;
+    ipa: string;
+    ur: string;
+  };
+  updated: string;
+}
+
+interface BaniToken {
+  token: string;
+}
+
+interface BaniGroup {
+  title: string;
+  banis: BaniToken[];
+}
+
+type BaniDisplayOrder = (BaniGroup | BaniToken)[];
 
 
-export type { CurrentBani, ShowBaniProps, BaniPartitions };
+export type { CurrentBani, ShowBaniProps, BaniPartitions, BaniInfo,BaniToken,BaniGroup,BaniDisplayOrder};

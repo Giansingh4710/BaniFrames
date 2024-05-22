@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react";
-import { ALL_BANIS_DATA, bani_partitions } from "./assets/banis_data";
-import { BaniPartitions, CurrentBani, ShowBaniProps } from "./assets/types";
+import {
+  ALL_BANIS_DATA,
+  Bani_Display_Order,
+  bani_partitions,
+} from "./assets/banis_data";
+import {
+  BaniPartitions,
+  CurrentBani,
+  ShowBaniProps,
+  BaniInfo,
+  BaniToken,
+  BaniGroup,
+  BaniDisplayOrder,
+} from "./assets/types";
 import { BaniApiData } from "./assets/bani_api_type";
 
 function App() {
@@ -9,7 +21,7 @@ function App() {
     return <ShowBani currBani={currBani} setCurrBani={setCurrBani} />;
 
   return (
-    <div className="flex pt-10 justify-center ">
+    <div className="">
       <BanisList setCurrBani={setCurrBani} />
     </div>
   );
@@ -19,9 +31,9 @@ function ShowBani({ currBani, setCurrBani }: ShowBaniProps) {
   const [bani_data, setBaniData] = useState<BaniApiData>();
   useEffect(() => {
     if (!currBani) return;
-    fetch(`./banis/japji.json`)
-      // fetch(`./assets/banis/${currBani?.token}.json`)
-      // fetch(`https://api.banidb.com/v2/banis/${currBani.ID}`)
+    // fetch(`./banis/japji.json`)
+    // fetch(`./assets/banis/${currBani?.token}.json`)
+    fetch(`https://api.banidb.com/v2/banis/${currBani.ID}`)
       .then((res) => res.json())
       .then((data) => setBaniData(data))
       .catch((err) => console.log(err));
@@ -56,22 +68,24 @@ function BaniText({
   partitions: number[];
 }) {
   const [currPartitionIdx, setCurrPartitionIdx] = useState<number>(0);
-  const [larivaarOn, setLarivaar] = useState(true);
+  const [toggleLineLarivaar, setLarivaar] = useState({
+    larivaarOff: false,
+    verseIdx: 0,
+  });
+  const [fontSize, setFontSize] = useState<number>(16); // Initial font size
 
   if (!bani_data) return null;
   let curr_paragraph = -1;
 
-  const verses = bani_data.verses.filter((obj) => {
-    if (currPartitionIdx === 0)
-      return obj.paragraph < partitions[currPartitionIdx];
-    else if (currPartitionIdx + 1 === partitions.length)
-      return obj.paragraph >= partitions[currPartitionIdx];
-
-    if (obj.paragraph >= partitions[currPartitionIdx - 1]) {
-      return obj.paragraph < partitions[currPartitionIdx];
-    }
-    return false;
-  });
+  let verses;
+  if (currPartitionIdx === partitions.length - 1)
+    verses = bani_data.verses.slice(partitions[currPartitionIdx]);
+  else {
+    verses = bani_data.verses.slice(
+      partitions[currPartitionIdx],
+      partitions[currPartitionIdx + 1],
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-74px)] items-center">
@@ -82,23 +96,23 @@ function BaniText({
         }}
         value={currPartitionIdx}
       >
-        {partitions.map((paragraphNum, idx) => {
-          const title =
-            idx === 0
-              ? bani_data.verses[0].verse.verse.unicode
-              : bani_data.verses.find((obj) => obj.paragraph === paragraphNum)
-                  ?.verse.verse.unicode;
+        {partitions.map((verseIdx, idx) => {
+          let title = bani_data.verses[verseIdx].verse.verse.unicode;
+          if ("sloku ]" === bani_data.verses[verseIdx].verse.verse.gurmukhi)
+            title = bani_data.verses[verseIdx + 1].verse.verse.unicode;
           return (
             <option key={idx} value={idx}>
-              {title}
+              {`${idx + 1}: ${title}`}
             </option>
           );
         })}
       </select>
-      <div className="w-full m-12 p-6  overflow-auto border border-sky-500 rounded">
-        {verses.map((obj, _) => {
+      <div
+        className="w-full m-12 p-6  overflow-auto border border-sky-500 rounded"
+        style={{ fontSize: `${fontSize}px` }}
+      >
+        {verses.map((obj, idx) => {
           const paragraph = obj.paragraph;
-          console.log(paragraph, partitions[currPartitionIdx]);
 
           const pangti = obj.verse.verse.unicode;
           const larivaar = obj.verse.larivaar.unicode;
@@ -109,22 +123,48 @@ function BaniText({
             add_space = true;
           }
           return (
-            <div>
+            <div key={idx}>
               {add_space && <br />}
               <p
                 onClick={() => {
-                  setLarivaar(!larivaarOn);
+                  let larivaarOff = true; // default to larivaar off when click on line
+                  if (toggleLineLarivaar.verseIdx === idx) {
+                    larivaarOff = !toggleLineLarivaar.larivaarOff;
+                  }
+                  setLarivaar({
+                    larivaarOff: larivaarOff,
+                    verseIdx: idx,
+                  });
                 }}
                 onDoubleClick={() => {
-                  // alert(translation);
+                  alert(translation);
                 }}
               >
-                {larivaarOn ? larivaar : pangti}
+                {toggleLineLarivaar.larivaarOff &&
+                toggleLineLarivaar.verseIdx === idx
+                  ? pangti
+                  : larivaar}
               </p>
             </div>
           );
         })}
       </div>
+      <div className="w-full m-4">
+        <input
+          type="range"
+          min="6"
+          max="96"
+          step="1"
+          value={fontSize}
+          onChange={(e) => setFontSize(parseInt(e.target.value))}
+          className="appearance-none bg-blue-300 h-3 rounded-full w-full outline-none cursor-pointer"
+        />
+        <div className="-mt-1 flex justify-between text-gray-500">
+          <span>6px</span>
+          <span>96px</span>
+        </div>
+      </div>
+
       <div className="flex-1 flex flex-row justify-around h-10  ">
         <button
           className=" m-1 p-2 border border-sky-500 rounded"
@@ -150,34 +190,55 @@ function BaniText({
 }
 
 function BanisList({ setCurrBani }: { setCurrBani: Function }) {
+  const [baniList, setBaniList] =
+    useState<BaniDisplayOrder>(Bani_Display_Order);
   return (
-    <div className="flex flex-col  overflow-auto bg-red-400">
-      {ALL_BANIS_DATA.map((obj) => {
-        const { token, gurmukhiUni, ID } = obj;
-        const partitions: number[] =
-          bani_partitions[token as keyof BaniPartitions];
+    <div className="flex flex-col overflow-auto bg-red-400 p-4 space-y-2">
+      {baniList.map((obj, idx) => {
+        let bani_title;
+        let onClickFunc;
 
-        if (!(token in bani_partitions)) return null;
+        if (isBaniToken(obj)) {
+          const { token, gurmukhiUni, ID } = getObjFromToken(obj.token);
+          bani_title = gurmukhiUni;
+          const partitions: number[] =
+            bani_partitions[token as keyof BaniPartitions];
+          onClickFunc = () => {
+            setCurrBani({
+              ID,
+              token,
+              gurmukhiUni,
+              partitions,
+            });
+          };
+        } else {
+          bani_title = obj["title"];
+          onClickFunc = () => {
+            setBaniList(obj["banis"]);
+          };
+        }
+
         return (
           <button
-            key={token}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded m-1"
-            onClick={() => {
-              setCurrBani({
-                ID,
-                token,
-                gurmukhiUni,
-                partitions,
-              });
-            }}
+            key={idx}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            onClick={onClickFunc}
           >
-            <h1>{gurmukhiUni}</h1>
+            <h1 className="text-lg">{bani_title}</h1>
           </button>
         );
       })}
       <br />
     </div>
   );
+}
+
+function getObjFromToken(token: string) {
+  return ALL_BANIS_DATA.find((obj) => obj.token === token) as BaniInfo;
+}
+
+function isBaniToken(obj: BaniGroup | BaniToken): obj is BaniToken {
+  return (obj as BaniToken).token !== undefined;
 }
 
 export default App;
