@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ALL_BANIS_DATA,
   Bani_Display_Order,

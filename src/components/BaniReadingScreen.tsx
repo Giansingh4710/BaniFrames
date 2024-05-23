@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { CurrentBani } from "../assets/types.ts";
 import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
 
