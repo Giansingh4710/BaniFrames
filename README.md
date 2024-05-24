@@ -3,6 +3,8 @@
 # Made this to be like the Bahu Shabadi App but for other banis
 
 
+# Fonts downloded from
+(gurmukhifonts)[https://gurmukhifonts.com/fonts/mostdownloaded]
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

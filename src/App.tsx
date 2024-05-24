@@ -1,4 +1,4 @@
-import { useState } from "react";
+import  { useState } from "react";
 import {
   ALL_BANIS_DATA,
   Bani_Display_Order,
@@ -65,6 +65,10 @@ function BanisList({
         if (isBaniToken(obj)) {
           const { token, gurmukhiUni, ID } = getObjFromToken(obj.token);
           bani_title = gurmukhiUni;
+          if (!(token in bani_partitions)) {
+            // console.log(`Token ${token} not found in bani_partitions`);
+            return
+          }
           const partitions: number[] =
             bani_partitions[token as keyof BaniPartitions];
           onClickFunc = () => {

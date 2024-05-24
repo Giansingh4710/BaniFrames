@@ -17,3 +17,47 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: 'Adhiapakblack';
+    src: url('/fonts/Adhiapak Black Black.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AdhiapakBold';
+    src: url('/fonts/Adhiapak Bold Bold.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AdhiapakBook';
+    src: url('/fonts/Adhiapak Book Book.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AdhiapakChiselBlack';
+    src: url('/fonts/Adhiapak Chisel Black Black.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AdhiapakExtraLight';
+    src: url('/fonts/Adhiapak Extra Light Extra Light.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AdhiapakLight';
+    src: url('/fonts/Adhiapak Light Light.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AdhiapakMedium';
+    src: url('/fonts/Adhiapak Medium Medium.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AmrLipiHeavyRegular';
+    src: url('/fonts/AmrLipiHeavy Regular.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'AnmolLipiRegular';
+    src: url('/fonts/AnmolLipi Regular.ttf') format('woff');
+  }
+  @font-face {
+    font-family: 'Choti';
+    src: url('/fonts/Choti Script 7 Bold Bold.ttf') format('woff2');
+  }
+}
+

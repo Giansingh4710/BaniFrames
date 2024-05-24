@@ -38,7 +38,7 @@ interface Writer {
 
 interface Verse {
   header: number;
-  mangalPosition?: number | null;
+  mangalPosition: "above" | "current" | null;
   existsSGPC: number;
   existsMedium: number;
   existsTaksal: number;

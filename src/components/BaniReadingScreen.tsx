@@ -1,6 +1,19 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CurrentBani } from "../assets/types.ts";
 import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
+
+const fonts = [
+  "amrlipiheavyregular",
+  "anmollipiregular",
+  "choti",
+  "adhiapakblack",
+  "adhiapakbold",
+  "adhiapakchiselblack",
+  "adhiapakbook",
+  "adhiapakmedium",
+  "adhiapaklight",
+  "adhiapakextralight",
+];
 
 function ShowBani({ currBani }: { currBani: CurrentBani }) {
   const [bani_data, setBaniData] = useState<BaniApiData>();
@@ -8,9 +21,15 @@ function ShowBani({ currBani }: { currBani: CurrentBani }) {
     if (!currBani) return;
     // fetch(`./banis/japji.json`)
     // fetch(`./assets/banis/${currBani?.token}.json`)
+    // console.log(`https://api.banidb.com/v2/banis/${currBani.ID}`);
     fetch(`https://api.banidb.com/v2/banis/${currBani.ID}`)
       .then((res) => res.json())
-      .then((data) => setBaniData(data))
+      .then((data) => {
+        data.verses = data.verses.filter(
+          (verse: Verse) => verse.mangalPosition !== "above",
+        );
+        setBaniData(data);
+      })
       .catch((err) => console.log(err));
   }, []);
   if (!currBani) return null;
@@ -26,11 +45,15 @@ function BaniText({
   partitions: number[];
 }) {
   const [currPartitionIdx, setCurrPartitionIdx] = useState<number>(0);
-  const [toggleLineLarivaar, setLarivaar] = useState({
+  const [larivaar, setLarivaar] = useState(false);
+  const [toggleLineLarivaar, setLineLarivaar] = useState({
     larivaarOff: false,
     verseIdx: 0,
   });
+  const [isInline, setIsInline] = useState(false);
+
   const [fontSize, setFontSize] = useState<number>(18); // Initial font size
+  const [selectedFont, setFont] = useState<string>(fonts[0]);
 
   if (!bani_data) return null;
   let last_paragraph = -1;
@@ -43,10 +66,10 @@ function BaniText({
       partitions[currPartitionIdx],
       partitions[currPartitionIdx + 1],
     );
+    // showNumbers(bani_data);
   }
 
   const SelectOptions = () => {
-    // vertical center = 'flex flex-col items-center'
     return (
       <div className="flex flex-col items-center">
         <select
@@ -59,8 +82,9 @@ function BaniText({
         >
           {partitions.map((verseIdx, idx) => {
             let title = bani_data.verses[verseIdx].verse.verse.unicode;
-            if ("sloku ]" === bani_data.verses[verseIdx].verse.verse.gurmukhi)
+            if (0 !== bani_data.verses[verseIdx].header) {
               title = bani_data.verses[verseIdx + 1].verse.verse.unicode;
+            }
             return (
               <option key={idx} value={idx}>
                 {`${idx + 1}: ${title}`}
@@ -76,42 +100,47 @@ function BaniText({
     return (
       <div className="w-full ">
         <div
-          className="mx-2 my-1 p-2 h-[550px] overflow-auto border border-sky-500 rounded"
+          className="text-white mx-2 my-1 p-2 h-[500px] overflow-auto border border-sky-500 rounded text-wrap"
           style={{ fontSize: `${fontSize}px` }}
         >
           {verses.map((obj: Verse, idx: number) => {
             const paragraph = obj.paragraph;
-            const pangti = obj.verse.verse.unicode;
-            const larivaar = obj.verse.larivaar.unicode;
+            // const pangti = obj.verse.verse.unicode;
+            const pangti = obj.verse.verse.gurmukhi;
+            const larivaarLine = obj.verse.larivaar.gurmukhi;
             const translation = obj.verse.translation.en.bdb;
             let add_space = false;
             if (paragraph !== last_paragraph) {
               last_paragraph = paragraph;
               add_space = true;
             }
+            let line = larivaar ? larivaarLine : pangti;
+            if ( toggleLineLarivaar.verseIdx === idx) {
+              line = toggleLineLarivaar.larivaarOff ? pangti : larivaarLine;
+            }
+            // ? pangti
+            // : larivaarLine;
             return (
-              <div key={obj.verse.verseId}>
+              <div key={obj.verse.verseId} className={isInline ? "inline" : ""}>
                 {add_space && <br />}
                 <button
                   onClick={() => {
-                    let larivaarOff = true; // default to larivaar off when click on line
+                    // if(!larivaar) return;
+                    let larivaarOff = false; // default to larivaar off when click on line
                     if (toggleLineLarivaar.verseIdx === idx) {
                       larivaarOff = !toggleLineLarivaar.larivaarOff;
                     }
-                    setLarivaar({
+                    setLineLarivaar({
                       larivaarOff: larivaarOff,
                       verseIdx: idx,
                     });
                   }}
                   onDoubleClick={() => {
-                    console.log(translation)
+                    console.log(translation);
                     alert(translation);
                   }}
                 >
-                  {toggleLineLarivaar.larivaarOff &&
-                  toggleLineLarivaar.verseIdx === idx
-                    ? pangti
-                    : larivaar}
+                  <p className="break-all">{line} </p>
                 </button>
               </div>
             );
@@ -148,7 +177,7 @@ function BaniText({
 
   const ButtomButtons = () => {
     return (
-      <div className="  p-2 flex flex-row justify-around">
+      <div className="p-2 flex flex-row justify-around gap-1 text-xs">
         <button
           className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
           onClick={() => {
@@ -157,6 +186,18 @@ function BaniText({
           }}
         >
           Back
+        </button>
+        <button
+          className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          onClick={() => setIsInline(!isInline)}
+        >
+          Toggle Paragraph Mode
+        </button>
+        <button
+          className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          onClick={() => setLarivaar(!larivaar)}
+        >
+          Toggle Larivaar
         </button>
         <button
           className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
@@ -171,14 +212,49 @@ function BaniText({
     );
   };
 
+  const ChooseFont = () => {
+    return (
+      <div className="flex flex-col items-center">
+        <select
+          className="m-1 mb-0 border border-sky-500 rounded bg-white text-black text-xs"
+          value={selectedFont}
+          onChange={(event) => {
+            setFont(event.currentTarget.value);
+          }}
+        >
+          {fonts.map((fontName, idx) => (
+            <option key={idx} value={fontName}>
+              Font: {fontName}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-74px)]">
-      <SelectOptions />
-      <DisplayVerses />
+      <ChooseFont />
+      <div style={{ fontFamily: selectedFont }}>
+        <SelectOptions />
+        <DisplayVerses />
+      </div>
       <Slider />
       <ButtomButtons />
     </div>
   );
 }
+
+/*
+function showNumbers(bani_data: BaniApiData) {
+  const verses = bani_data.verses;
+  const seen_paragraphs = new Set<number>();
+  for (let i = 0; i < verses.length; i++) {
+    if (seen_paragraphs.has(verses[i].paragraph)) continue;
+    seen_paragraphs.add(verses[i].paragraph);
+    // console.log(i, ":", verses[i].verse.verse.unicode);
+  }
+}
+*/
 
 export default ShowBani;
