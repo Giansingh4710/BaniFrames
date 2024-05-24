@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CurrentBani } from "../assets/types.ts";
 import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
+import { HTMLDivElement } from "react";
 
 const fonts = [
   "amrlipiheavyregular",
@@ -45,15 +46,18 @@ function BaniText({
   partitions: number[];
 }) {
   const [currPartitionIdx, setCurrPartitionIdx] = useState<number>(0);
-  const [larivaar, setLarivaar] = useState(false);
+  const [larivaarOn, setLarivaarOn] = useState(true);
   const [toggleLineLarivaar, setLineLarivaar] = useState({
     larivaarOff: false,
-    verseIdx: 0,
+    verseIdx: -1,
   });
-  const [isInline, setIsInline] = useState(false);
+  const [paragraphMode, setParaMode] = useState(false);
 
   const [fontSize, setFontSize] = useState<number>(18); // Initial font size
   const [selectedFont, setFont] = useState<string>(fonts[0]);
+
+  const baniViewDiv = useRef<HTMLDivElement>();
+  const scrollTo = useRef(0);
 
   if (!bani_data) return null;
   let last_paragraph = -1;
@@ -95,11 +99,15 @@ function BaniText({
       </div>
     );
   };
-
   const DisplayVerses = () => {
+    useEffect(() => {
+      baniViewDiv.current.scrollTop = scrollTo.current;
+    }, []);
+
     return (
       <div className="w-full ">
         <div
+          ref={baniViewDiv}
           className="text-white mx-2 my-1 p-2 h-[500px] overflow-auto border border-sky-500 rounded text-wrap"
           style={{ fontSize: `${fontSize}px` }}
         >
@@ -114,19 +122,25 @@ function BaniText({
               last_paragraph = paragraph;
               add_space = true;
             }
-            let line = larivaar ? larivaarLine : pangti;
-            if ( toggleLineLarivaar.verseIdx === idx) {
+            let line = larivaarOn ? larivaarLine : pangti;
+            if (toggleLineLarivaar.verseIdx === idx) {
               line = toggleLineLarivaar.larivaarOff ? pangti : larivaarLine;
             }
-            // ? pangti
-            // : larivaarLine;
             return (
-              <div key={obj.verse.verseId} className={isInline ? "inline" : ""}>
-                {add_space && <br />}
-                <button
+              <div
+                key={obj.verse.verseId}
+                className={paragraphMode ? "inline" : ""}
+              >
+                {add_space && (
+                  <div>
+                    <br />
+                  </div>
+                )}
+                <p
+                  className="break-all inline"
                   onClick={() => {
-                    // if(!larivaar) return;
-                    let larivaarOff = false; // default to larivaar off when click on line
+                    scrollTo.current = baniViewDiv.current.scrollTop;
+                    let larivaarOff = larivaarOn; // Default
                     if (toggleLineLarivaar.verseIdx === idx) {
                       larivaarOff = !toggleLineLarivaar.larivaarOff;
                     }
@@ -140,8 +154,8 @@ function BaniText({
                     alert(translation);
                   }}
                 >
-                  <p className="break-all">{line} </p>
-                </button>
+                  {line}
+                </p>
               </div>
             );
           })}
@@ -183,19 +197,20 @@ function BaniText({
           onClick={() => {
             if (currPartitionIdx === 0) return;
             setCurrPartitionIdx(currPartitionIdx - 1);
+            scrollTo.current = 0;
           }}
         >
           Back
         </button>
         <button
           className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-          onClick={() => setIsInline(!isInline)}
+          onClick={() => setParaMode(!paragraphMode)}
         >
           Toggle Paragraph Mode
         </button>
         <button
           className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-          onClick={() => setLarivaar(!larivaar)}
+          onClick={() => setLarivaarOn(!larivaarOn)}
         >
           Toggle Larivaar
         </button>
@@ -204,6 +219,7 @@ function BaniText({
           onClick={() => {
             if (currPartitionIdx + 1 === partitions.length) return;
             setCurrPartitionIdx(currPartitionIdx + 1);
+            scrollTo.current = 0;
           }}
         >
           Next
@@ -239,8 +255,8 @@ function BaniText({
         <SelectOptions />
         <DisplayVerses />
       </div>
-      <Slider />
       <ButtomButtons />
+      <Slider />
     </div>
   );
 }

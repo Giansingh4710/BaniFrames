@@ -57,7 +57,7 @@ function BanisList({
   setBaniList: Function;
 }) {
   return (
-    <div className="m-10 flex flex-col overflow-auto bg-gray-50 p-4 space-y-2">
+    <div className="m-10 flex flex-col overflow-auto bg-gray-600 p-4 space-y-2 rounded-lg">
       {baniList.map((obj: BaniGroup | BaniToken, idx: number) => {
         let bani_title;
         let onClickFunc;

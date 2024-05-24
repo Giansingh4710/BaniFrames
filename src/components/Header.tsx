@@ -11,9 +11,9 @@ function Header({
         className="p-1 m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded"
         onClick={() => onBackClick()}
       >
-        {"<-"} Back
+        Go Back
       </button>
-      <h1 className="flex-1 flex items-center justify-center pr-10 text-2xl font-extrabold">
+      <h1 className="flex-1 flex items-center justify-center pr-10 text-xl font-extrabold">
         {title}
       </h1>
     </div>
