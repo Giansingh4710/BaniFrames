@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { CurrentBani } from "../assets/types.ts";
 import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
+import { IoArrowBack } from "react-icons/io5";
+import { IoArrowForward } from "react-icons/io5";
 
 const fonts = [
   "amrlipiheavyregular",
@@ -22,7 +24,9 @@ function ShowBani({ currBani }: { currBani: CurrentBani }) {
     // fetch(`./banis/japji.json`)
     // fetch(`./assets/banis/${currBani?.token}.json`)
     // console.log(`https://api.banidb.com/v2/banis/${currBani.ID}`);
-    fetch(`https://api.banidb.com/v2/banis/${currBani.ID}`)
+    fetch(`https://api.banidb.com/v2/banis/${currBani.ID}`, {
+      cache: "force-cache",
+    })
       .then((res) => res.json())
       .then((data) => {
         data.verses = data.verses.filter(
@@ -74,10 +78,19 @@ function BaniText({
   }
 
   const SelectOptions = () => {
+    function getRightSize(str: string) {
+      const bestSize = 50;
+      if (str.length < bestSize) return str;
+      return str.slice(0, bestSize) + "...";
+    }
+
     return (
-      <div className="flex flex-col items-center">
+      <div
+        className="flex flex-col items-center"
+        style={{ fontFamily: selectedFont }}
+      >
         <select
-          className="m-1 mb-0 border border-sky-500 rounded bg-white text-black text-xs"
+          className="m-1 p-1 border border-sky-500 rounded bg-white text-black text-xs"
           onChange={(event) => {
             const idx = parseInt(event.currentTarget.value);
             setCurrPartitionIdx(idx);
@@ -87,11 +100,16 @@ function BaniText({
           {partitions.map((verseIdx, idx) => {
             let title = bani_data.verses[verseIdx].verse.verse.unicode;
             if (0 !== bani_data.verses[verseIdx].header) {
-              title = bani_data.verses[verseIdx + 1].verse.verse.unicode;
+              for (let i = 0; i < 3; i++) {
+                title = bani_data.verses[verseIdx + i].verse.verse.unicode;
+                if (0 === bani_data.verses[verseIdx + i].header) {
+                  break;
+                }
+              }
             }
             return (
               <option key={idx} value={idx}>
-                {`${idx + 1}: ${title}`}
+                {getRightSize(`${idx + 1}: ${title}`)}
               </option>
             );
           })}
@@ -99,14 +117,34 @@ function BaniText({
       </div>
     );
   };
+
+  const SelectFont = () => {
+    return (
+      <div className="flex flex-col items-center">
+        <select
+          className="m-1 p-1  border border-sky-500 rounded bg-white text-black text-xs"
+          value={selectedFont}
+          onChange={(event) => {
+            setFont(event.currentTarget.value);
+          }}
+        >
+          {fonts.map((fontName, idx) => (
+            <option key={idx} value={fontName}>
+              Font: {fontName}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
   const DisplayVerses = () => {
     useEffect(() => {
-      if (baniViewDiv.current?.scrollTop)
-        baniViewDiv.current.scrollTop = scrollTo.current;
+      if (baniViewDiv.current) baniViewDiv.current.scrollTop = scrollTo.current;
     }, []);
 
     return (
-      <div className="w-full ">
+      <div className="w-full " style={{ fontFamily: selectedFont }}>
         <div
           ref={baniViewDiv}
           className="text-white mx-2 my-1 p-2 h-[500px] overflow-auto border border-sky-500 rounded text-wrap"
@@ -140,8 +178,8 @@ function BaniText({
                 <p
                   className="break-all inline"
                   onClick={() => {
-                    if(baniViewDiv.current?.scrollTop){
-                      scrollTo.current = baniViewDiv.current.scrollTop
+                    if (baniViewDiv.current?.scrollTop) {
+                      scrollTo.current = baniViewDiv.current.scrollTop;
                     }
 
                     let larivaarOff = larivaarOn; // Default
@@ -197,70 +235,48 @@ function BaniText({
     return (
       <div className="p-2 flex flex-row justify-around gap-1 text-xs">
         <button
-          className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="px-4 py-1 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
           onClick={() => {
             if (currPartitionIdx === 0) return;
             setCurrPartitionIdx(currPartitionIdx - 1);
             scrollTo.current = 0;
           }}
         >
-          Back
+          <IoArrowBack size={30} />
         </button>
         <button
-          className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="px-4 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
           onClick={() => setParaMode(!paragraphMode)}
         >
-          Toggle Paragraph Mode
+          Toggle Paragraph
         </button>
         <button
-          className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="px-4  border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
           onClick={() => setLarivaarOn(!larivaarOn)}
         >
           Toggle Larivaar
         </button>
         <button
-          className="px-4 py-2 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="px-4 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
           onClick={() => {
             if (currPartitionIdx + 1 === partitions.length) return;
             setCurrPartitionIdx(currPartitionIdx + 1);
             scrollTo.current = 0;
           }}
         >
-          Next
+          <IoArrowForward size={30} />
         </button>
-      </div>
-    );
-  };
-
-  const ChooseFont = () => {
-    return (
-      <div className="flex flex-col items-center">
-        <select
-          className="m-1 mb-0 border border-sky-500 rounded bg-white text-black text-xs"
-          value={selectedFont}
-          onChange={(event) => {
-            setFont(event.currentTarget.value);
-          }}
-        >
-          {fonts.map((fontName, idx) => (
-            <option key={idx} value={fontName}>
-              Font: {fontName}
-            </option>
-          ))}
-        </select>
       </div>
     );
   };
 
   return (
     <div className="flex flex-col h-[calc(100vh-74px)]">
-      <ChooseFont />
-      <div style={{ fontFamily: selectedFont }}>
-        <SelectOptions />
-        <DisplayVerses />
-      </div>
+      <SelectOptions />
+      <DisplayVerses />
       <ButtomButtons />
       <Slider />
+      <SelectFont />
     </div>
   );
 }

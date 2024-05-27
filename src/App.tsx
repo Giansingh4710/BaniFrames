@@ -15,6 +15,7 @@ import {
 import Header from "./components/Header.tsx";
 import ShowBani from "./components/BaniReadingScreen.tsx";
 
+
 function App() {
   const [currBani, setCurrBani] = useState<CurrentBani | undefined>();
   const [baniList, setBaniList] =

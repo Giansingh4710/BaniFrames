@@ -1,3 +1,5 @@
+import { IoArrowBack } from "react-icons/io5";
+
 function Header({
   title,
   onBackClick,
@@ -11,7 +13,7 @@ function Header({
         className="p-1 m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded"
         onClick={() => onBackClick()}
       >
-        Go Back
+        <IoArrowBack size={15}  />
       </button>
       <h1 className="flex-1 flex items-center justify-center pr-10 text-xl font-extrabold">
         {title}
