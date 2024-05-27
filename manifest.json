@@ -2,7 +2,7 @@
   "name": "Bani Frames",
   "short_name": "Bani Frames",
   "description": "Bani in Chunks",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "theme_color": "#ffffff",
   "background_color": "#ffffff",
