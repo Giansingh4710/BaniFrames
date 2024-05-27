@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CurrentBani } from "../assets/types.ts";
 import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
-import { HTMLDivElement } from "react";
 
 const fonts = [
   "amrlipiheavyregular",
@@ -56,7 +55,8 @@ function BaniText({
   const [fontSize, setFontSize] = useState<number>(18); // Initial font size
   const [selectedFont, setFont] = useState<string>(fonts[0]);
 
-  const baniViewDiv = useRef<HTMLDivElement>();
+  const baniViewDiv = useRef<HTMLDivElement>(null);
+  // const baniViewDiv = useRef();
   const scrollTo = useRef(0);
 
   if (!bani_data) return null;
@@ -101,7 +101,8 @@ function BaniText({
   };
   const DisplayVerses = () => {
     useEffect(() => {
-      baniViewDiv.current.scrollTop = scrollTo.current;
+      if (baniViewDiv.current?.scrollTop)
+        baniViewDiv.current.scrollTop = scrollTo.current;
     }, []);
 
     return (
@@ -139,7 +140,10 @@ function BaniText({
                 <p
                   className="break-all inline"
                   onClick={() => {
-                    scrollTo.current = baniViewDiv.current.scrollTop;
+                    if(baniViewDiv.current?.scrollTop){
+                      scrollTo.current = baniViewDiv.current.scrollTop
+                    }
+
                     let larivaarOff = larivaarOn; // Default
                     if (toggleLineLarivaar.verseIdx === idx) {
                       larivaarOff = !toggleLineLarivaar.larivaarOff;
