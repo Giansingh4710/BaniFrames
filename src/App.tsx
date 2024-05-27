@@ -32,7 +32,7 @@ function App() {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-gray-800">
+    <div className="h-screen bg-gray-800">
       <Header
         title={currBani?.gurmukhiUni || "Bani Frames"}
         onBackClick={() => {
