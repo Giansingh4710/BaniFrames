@@ -4,8 +4,8 @@
   "description": "Bani in Chunks",
   "start_url": "./",
   "display": "standalone",
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#1F2937",
+  "background_color": "#1F2937",
   "icons": [
     {
       "src": "icons/android/android-launchericon-512-512.png",
