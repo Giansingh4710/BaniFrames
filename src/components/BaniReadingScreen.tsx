@@ -5,6 +5,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { IoArrowForward } from "react-icons/io5";
 
 const fonts = [
+  "unicode",
   "amrlipiheavyregular",
   "anmollipiregular",
   "choti",
@@ -57,7 +58,6 @@ function BaniText({
   const [paragraphMode, setParaMode] = useState(false);
 
   const [fontSize, setFontSize] = useState<number>(18); // Initial font size
-  const [selectedFont, setFont] = useState<string>(fonts[0]);
 
   const baniViewDiv = useRef<HTMLDivElement>(null);
   // const baniViewDiv = useRef();
@@ -87,7 +87,7 @@ function BaniText({
     return (
       <div
         className="flex flex-col items-center"
-        style={{ fontFamily: selectedFont }}
+        // style={{ fontFamily: selectedFont }}
       >
         <select
           className="m-1 p-1 border border-sky-500 rounded bg-white text-black text-xs"
@@ -118,33 +118,16 @@ function BaniText({
     );
   };
 
-  const SelectFont = () => {
-    return (
-      <div className="flex flex-col items-center">
-        <select
-          className="m-1 p-1  border border-sky-500 rounded bg-white text-black text-xs"
-          value={selectedFont}
-          onChange={(event) => {
-            setFont(event.currentTarget.value);
-          }}
-        >
-          {fonts.map((fontName, idx) => (
-            <option key={idx} value={fontName}>
-              Font: {fontName}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  };
-
   const DisplayVerses = () => {
     useEffect(() => {
       if (baniViewDiv.current) baniViewDiv.current.scrollTop = scrollTo.current;
     }, []);
 
     return (
-      <div className="w-full " style={{ fontFamily: selectedFont }}>
+      <div
+        className="w-full"
+        // style={{ fontFamily: selectedFont }}
+      >
         <div
           ref={baniViewDiv}
           className="text-white mx-2 my-1 p-2 h-[500px] overflow-auto border border-sky-500 rounded text-wrap"
@@ -152,9 +135,10 @@ function BaniText({
         >
           {verses.map((obj: Verse, idx: number) => {
             const paragraph = obj.paragraph;
-            // const pangti = obj.verse.verse.unicode;
-            const pangti = obj.verse.verse.gurmukhi;
-            const larivaarLine = obj.verse.larivaar.gurmukhi;
+            const pangti = obj.verse.verse.unicode;
+            // const pangti = obj.verse.verse.gurmukhi;
+            // const larivaarLine = obj.verse.larivaar.gurmukhi;
+            const larivaarLine = pangti.replace(/ /g, "");
             const translation = obj.verse.translation.en.bdb;
             let add_space = false;
             if (paragraph !== last_paragraph) {
@@ -176,7 +160,7 @@ function BaniText({
                   </div>
                 )}
                 <p
-                  className="break-all inline"
+                  className={larivaarOn ? "break-all" : "break-word"}
                   onClick={() => {
                     if (baniViewDiv.current?.scrollTop) {
                       scrollTo.current = baniViewDiv.current.scrollTop;
@@ -276,7 +260,6 @@ function BaniText({
       <DisplayVerses />
       <ButtomButtons />
       <Slider />
-      <SelectFont />
     </div>
   );
 }
