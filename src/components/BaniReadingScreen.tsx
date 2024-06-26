@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { CurrentBani } from "../assets/types.ts";
 import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
 import { IoArrowBack } from "react-icons/io5";
+import { FaPlus } from "react-icons/fa";
+import { FaMinus } from "react-icons/fa";
 import { IoArrowForward } from "react-icons/io5";
+import Header from "./Header.tsx";
 
 const fonts = [
-  "unicode",
   "amrlipiheavyregular",
+  "unicode",
   "anmollipiregular",
   "choti",
   "adhiapakblack",
@@ -18,8 +21,16 @@ const fonts = [
   "adhiapakextralight",
 ];
 
-function ShowBani({ currBani }: { currBani: CurrentBani }) {
+function ShowBani({
+  currBani,
+  goBack,
+}: {
+  currBani: CurrentBani;
+  goBack: Function;
+}) {
   const [bani_data, setBaniData] = useState<BaniApiData>();
+  const [currPartitionIdx, setCurrPartitionIdx] = useState<number>(0);
+  const partitions = currBani.partitions;
   useEffect(() => {
     if (!currBani) return;
     // fetch(`./banis/japji.json`)
@@ -37,49 +48,13 @@ function ShowBani({ currBani }: { currBani: CurrentBani }) {
       })
       .catch((err) => console.log(err));
   }, []);
+
   if (!currBani) return null;
-
-  return <BaniText bani_data={bani_data} partitions={currBani.partitions} />;
-}
-
-function BaniText({
-  bani_data,
-  partitions,
-}: {
-  bani_data: BaniApiData | undefined;
-  partitions: number[];
-}) {
-  const [currPartitionIdx, setCurrPartitionIdx] = useState<number>(0);
-  const [larivaarOn, setLarivaarOn] = useState(true);
-  const [toggleLineLarivaar, setLineLarivaar] = useState({
-    larivaarOff: false,
-    verseIdx: -1,
-  });
-  const [paragraphMode, setParaMode] = useState(false);
-
-  const [fontSize, setFontSize] = useState<number>(18); // Initial font size
-
-  const baniViewDiv = useRef<HTMLDivElement>(null);
-  // const baniViewDiv = useRef();
-  const scrollTo = useRef(0);
-
   if (!bani_data) return null;
-  let last_paragraph = -1;
-
-  let verses: Verse[] = [];
-  if (currPartitionIdx === partitions.length - 1)
-    verses = bani_data.verses.slice(partitions[currPartitionIdx]);
-  else {
-    verses = bani_data.verses.slice(
-      partitions[currPartitionIdx],
-      partitions[currPartitionIdx + 1],
-    );
-    // showNumbers(bani_data);
-  }
 
   const SelectOptions = () => {
     function getRightSize(str: string) {
-      const bestSize = 50;
+      const bestSize = 20;
       if (str.length < bestSize) return str;
       return str.slice(0, bestSize) + "...";
     }
@@ -90,7 +65,7 @@ function BaniText({
         // style={{ fontFamily: selectedFont }}
       >
         <select
-          className="m-1 p-1 border border-sky-500 rounded bg-white text-black text-xs"
+          className="m-1 p-1 border rounded bg-white text-black text-xs"
           onChange={(event) => {
             const idx = parseInt(event.currentTarget.value);
             setCurrPartitionIdx(idx);
@@ -118,6 +93,87 @@ function BaniText({
     );
   };
 
+  return (
+    <div className="h-svh bg-gray-800">
+      <Header
+        title={currBani.gurmukhiUni}
+        onBackClick={goBack}
+        rightComponent={() => <SelectOptions />}
+      />
+      <BaniText
+        bani_data={bani_data}
+        partitions={partitions}
+        currPartitionIdx={currPartitionIdx}
+        setCurrPartitionIdx={setCurrPartitionIdx}
+      />
+    </div>
+  );
+}
+
+function BaniText({
+  bani_data,
+  partitions,
+  currPartitionIdx,
+  setCurrPartitionIdx,
+}: {
+  bani_data: BaniApiData;
+  partitions: number[];
+  currPartitionIdx: number;
+  setCurrPartitionIdx: Function;
+}) {
+  const [larivaarOn, setLarivaarOn] = useState(true);
+  const [toggleLineLarivaar, setLineLarivaar] = useState({
+    larivaarOff: false,
+    verseIdx: -1,
+  });
+  const [paragraphMode, setParaMode] = useState(false);
+
+  const [fontSize, setFontSize] = useState<number>(18); // Initial font size
+  const [selectedFont, setFont] = useState<string>(fonts[0]);
+  const [unicodeOn, setUnicode] = useState<boolean>(false);
+
+  const baniViewDiv = useRef<HTMLDivElement>(null);
+  // const baniViewDiv = useRef();
+  const scrollTo = useRef(0);
+
+  let last_paragraph = -1;
+
+  let verses: Verse[] = [];
+  if (currPartitionIdx === partitions.length - 1)
+    verses = bani_data.verses.slice(partitions[currPartitionIdx]);
+  else {
+    verses = bani_data.verses.slice(
+      partitions[currPartitionIdx],
+      partitions[currPartitionIdx + 1],
+    );
+    // showNumbers(bani_data);
+  }
+
+  const SelectFont = () => {
+    return (
+      <div className="flex flex-col items-center">
+        <select
+          className="m-1 p-1  border border-sky-500 rounded bg-white text-black text-xs"
+          value={selectedFont}
+          onChange={(event) => {
+            if (event.currentTarget.value === "unicode") {
+              setUnicode(true);
+            } else {
+              setFont(event.currentTarget.value);
+              setUnicode(false);
+            }
+          }}
+        >
+          {fonts.map((fontName, idx) => (
+            <option key={idx} value={fontName}>
+              Font: {fontName}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
   const DisplayVerses = () => {
     useEffect(() => {
       if (baniViewDiv.current) baniViewDiv.current.scrollTop = scrollTo.current;
@@ -125,78 +181,108 @@ function BaniText({
 
     return (
       <div
-        className="w-full"
-        // style={{ fontFamily: selectedFont }}
+        ref={baniViewDiv}
+        className="text-white mx-2 my-1 p-2 h-[70vh] overflow-auto border border-sky-500 rounded text-wrap"
+        style={{ fontFamily: selectedFont, fontSize: `${fontSize}px` }}
       >
-        <div
-          ref={baniViewDiv}
-          className="text-white mx-2 my-1 p-2 h-[500px] overflow-auto border border-sky-500 rounded text-wrap"
-          style={{ fontSize: `${fontSize}px` }}
-        >
-          {verses.map((obj: Verse, idx: number) => {
-            const paragraph = obj.paragraph;
-            const pangti = obj.verse.verse.unicode;
-            // const pangti = obj.verse.verse.gurmukhi;
-            // const larivaarLine = obj.verse.larivaar.gurmukhi;
-            const larivaarLine = pangti.replace(/ /g, "");
-            const translation = obj.verse.translation.en.bdb;
-            let add_space = false;
-            if (paragraph !== last_paragraph) {
-              last_paragraph = paragraph;
-              add_space = true;
-            }
-            let line = larivaarOn ? larivaarLine : pangti;
-            if (toggleLineLarivaar.verseIdx === idx) {
-              line = toggleLineLarivaar.larivaarOff ? pangti : larivaarLine;
-            }
-            return (
-              <div
-                key={obj.verse.verseId}
-                className={paragraphMode ? "inline" : ""}
-              >
-                {add_space && (
-                  <div>
-                    <br />
-                  </div>
-                )}
-                <p
-                  className={larivaarOn ? "break-all" : "break-word"}
-                  onClick={() => {
-                    if (baniViewDiv.current?.scrollTop) {
-                      scrollTo.current = baniViewDiv.current.scrollTop;
-                    }
+        {verses.map((obj: Verse, idx: number) => {
+          const paragraph = obj.paragraph;
+          let pangti = obj.verse.verse.gurmukhi;
+          let larivaarLine = obj.verse.larivaar.gurmukhi;
+          if (unicodeOn) {
+            pangti = obj.verse.verse.unicode;
+            larivaarLine = pangti.replace(/ /g, "");
+          }
 
-                    let larivaarOff = larivaarOn; // Default
-                    if (toggleLineLarivaar.verseIdx === idx) {
-                      larivaarOff = !toggleLineLarivaar.larivaarOff;
-                    }
-                    setLineLarivaar({
-                      larivaarOff: larivaarOff,
-                      verseIdx: idx,
-                    });
-                  }}
-                  onDoubleClick={() => {
-                    console.log(translation);
-                    alert(translation);
-                  }}
-                >
-                  {line}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+          const translation = obj.verse.translation.en.bdb;
+          let add_space = false;
+          if (paragraph !== last_paragraph) {
+            last_paragraph = paragraph;
+            add_space = true;
+          }
+          let line = larivaarOn ? larivaarLine : pangti;
+          let currentLineIsLarivaar = larivaarOn;
+
+          if (toggleLineLarivaar.verseIdx === idx) {
+            if (toggleLineLarivaar.larivaarOff) {
+              line = pangti;
+              currentLineIsLarivaar = false;
+            } else {
+              line = larivaarLine;
+              currentLineIsLarivaar = true;
+            }
+          }
+
+          const classes = [
+            currentLineIsLarivaar ? "break-all" : "break-word",
+            paragraphMode ? "inline-block" : "",
+            "w-fit",
+          ];
+
+          return (
+            <span
+              key={obj.verse.verseId}
+              className={classes.join(" ")}
+            >
+              {add_space && (
+                <div>
+                  <br />
+                </div>
+              )}
+              <p
+                onClick={() => {
+                  if (baniViewDiv.current?.scrollTop) {
+                    scrollTo.current = baniViewDiv.current.scrollTop;
+                  }
+
+                  let larivaarOff = larivaarOn; // Default
+                  if (toggleLineLarivaar.verseIdx === idx) {
+                    larivaarOff = !toggleLineLarivaar.larivaarOff;
+                  }
+                  setLineLarivaar({
+                    larivaarOff: larivaarOff,
+                    verseIdx: idx,
+                  });
+                }}
+                onDoubleClick={() => {
+                  console.log(translation);
+                  alert(translation);
+                }}
+              >
+                {line}
+              </p>
+            </span>
+          );
+        })}
       </div>
     );
   };
 
-  const Slider = () => {
+  const ChangeFontSize = () => {
     return (
       <div className="w-full p-2">
-        <div>
+        <div className="p-2 flex flex-row justify-around gap-1 text-xs">
+          <button
+            className="px-4 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+            onClick={() => {
+              if (fontSize === 6) return;
+              setFontSize(fontSize - 1);
+            }}
+          >
+            <FaMinus />
+          </button>
           <span className="text-lg flex flex-col items-center">
             Font Size: {fontSize}px
           </span>
+          <button
+            className="px-4 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+            onClick={() => {
+              if (fontSize === 64) return;
+              setFontSize(fontSize + 1);
+            }}
+          >
+            <FaPlus />
+          </button>
         </div>
         <input
           type="range"
@@ -256,10 +342,10 @@ function BaniText({
 
   return (
     <div className="flex flex-col h-[calc(100vh-74px)]">
-      <SelectOptions />
       <DisplayVerses />
       <ButtomButtons />
-      <Slider />
+      <ChangeFontSize />
+      <SelectFont />
     </div>
   );
 }
