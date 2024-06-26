@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CurrentBani } from "../assets/types.ts";
 import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
 import { IoArrowBack } from "react-icons/io5";
@@ -149,6 +149,14 @@ function BaniText({
     // showNumbers(bani_data);
   }
 
+  useMemo(() => { // useMemo runs before useEffect
+    const storageFontSize = localStorage.getItem("BaniFontSize")
+
+    if (storageFontSize) {
+      setFontSize(parseInt(storageFontSize));
+    }
+  },[])
+
   const SelectFont = () => {
     return (
       <div className="flex flex-col items-center">
@@ -220,10 +228,7 @@ function BaniText({
           ];
 
           return (
-            <span
-              key={obj.verse.verseId}
-              className={classes.join(" ")}
-            >
+            <span key={obj.verse.verseId} className={classes.join(" ")}>
               {add_space && (
                 <div>
                   <br />
@@ -258,7 +263,8 @@ function BaniText({
     );
   };
 
-  const ChangeFontSize = () => {
+  const changeFontSize = useMemo(() => {
+    localStorage.setItem("BaniFontSize", fontSize.toString());
     return (
       <div className="w-full p-2">
         <div className="p-2 flex flex-row justify-around gap-1 text-xs">
@@ -299,7 +305,7 @@ function BaniText({
         </div>
       </div>
     );
-  };
+  }, [fontSize]);
 
   const ButtomButtons = () => {
     return (
@@ -344,7 +350,7 @@ function BaniText({
     <div className="flex flex-col h-[calc(100vh-74px)]">
       <DisplayVerses />
       <ButtomButtons />
-      <ChangeFontSize />
+      {changeFontSize}
       <SelectFont />
     </div>
   );

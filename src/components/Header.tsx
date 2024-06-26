@@ -6,8 +6,8 @@ function Header({
   rightComponent,
 }: {
   title: string;
-  onBackClick: Function;
-  rightComponent: Function;
+  onBackClick: Function | undefined;
+  rightComponent: Function | undefined;
 }) {
   return (
     <div className="h-15 flex flex-row overflow-auto bg-red-400 justify-center ">
