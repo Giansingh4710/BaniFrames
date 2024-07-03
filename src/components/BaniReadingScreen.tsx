@@ -60,10 +60,7 @@ function ShowBani({
     }
 
     return (
-      <div
-        className="flex flex-col items-center"
-        // style={{ fontFamily: selectedFont }}
-      >
+      <div className="flex flex-col items-center">
         <select
           className="m-1 p-1 border rounded bg-white text-black text-xs"
           onChange={(event) => {
@@ -126,7 +123,7 @@ function BaniText({
     larivaarOff: false,
     verseIdx: -1,
   });
-  const [paragraphMode, setParaMode] = useState(false);
+  const [translationsOn, setTranslations] = useState(false);
 
   const [fontSize, setFontSize] = useState<number>(18); // Initial font size
   const [selectedFont, setFont] = useState<string>(fonts[0]);
@@ -149,13 +146,14 @@ function BaniText({
     // showNumbers(bani_data);
   }
 
-  useMemo(() => { // useMemo runs before useEffect
-    const storageFontSize = localStorage.getItem("BaniFontSize")
+  useMemo(() => {
+    // useMemo runs before useEffect
+    const storageFontSize = localStorage.getItem("BaniFontSize");
 
     if (storageFontSize) {
       setFontSize(parseInt(storageFontSize));
     }
-  },[])
+  }, []);
 
   const SelectFont = () => {
     return (
@@ -167,9 +165,9 @@ function BaniText({
             if (event.currentTarget.value === "unicode") {
               setUnicode(true);
             } else {
-              setFont(event.currentTarget.value);
               setUnicode(false);
             }
+            setFont(event.currentTarget.value);
           }}
         >
           {fonts.map((fontName, idx) => (
@@ -191,18 +189,18 @@ function BaniText({
       <div
         ref={baniViewDiv}
         className="text-white mx-2 my-1 p-2 h-[70vh] overflow-auto border border-sky-500 rounded text-wrap"
-        style={{ fontFamily: selectedFont, fontSize: `${fontSize}px` }}
+        style={{ fontSize: `${fontSize}px` }}
       >
         {verses.map((obj: Verse, idx: number) => {
           const paragraph = obj.paragraph;
           let pangti = obj.verse.verse.gurmukhi;
           let larivaarLine = obj.verse.larivaar.gurmukhi;
+          const translation = obj.verse.translation.en.bdb;
           if (unicodeOn) {
             pangti = obj.verse.verse.unicode;
             larivaarLine = pangti.replace(/ /g, "");
           }
 
-          const translation = obj.verse.translation.en.bdb;
           let add_space = false;
           if (paragraph !== last_paragraph) {
             last_paragraph = paragraph;
@@ -223,7 +221,6 @@ function BaniText({
 
           const classes = [
             currentLineIsLarivaar ? "break-all" : "break-word",
-            paragraphMode ? "inline-block" : "",
             "w-fit",
           ];
 
@@ -235,6 +232,7 @@ function BaniText({
                 </div>
               )}
               <p
+                style={{ fontFamily: selectedFont }}
                 onClick={() => {
                   if (baniViewDiv.current?.scrollTop) {
                     scrollTo.current = baniViewDiv.current.scrollTop;
@@ -256,6 +254,7 @@ function BaniText({
               >
                 {line}
               </p>
+              {translationsOn && <p>{translation}</p>}
             </span>
           );
         })}
@@ -322,9 +321,9 @@ function BaniText({
         </button>
         <button
           className="px-4 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-          onClick={() => setParaMode(!paragraphMode)}
+          onClick={() => setTranslations(!translationsOn)}
         >
-          Toggle Paragraph
+          Toggle Translations
         </button>
         <button
           className="px-4  border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"

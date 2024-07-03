@@ -5,7 +5,6 @@ interface CurrentBani {
   partitions: number[];
 }
 
-
 type BaniPartitions = {
   [key in BaniPartitionKey]: number[];
 };
@@ -53,5 +52,11 @@ interface BaniGroup {
 
 type BaniDisplayOrder = (BaniGroup | BaniToken)[];
 
-
-export type { CurrentBani, BaniPartitions, BaniInfo,BaniToken,BaniGroup,BaniDisplayOrder};
+export type {
+  CurrentBani,
+  BaniPartitions,
+  BaniInfo,
+  BaniToken,
+  BaniGroup,
+  BaniDisplayOrder,
+};

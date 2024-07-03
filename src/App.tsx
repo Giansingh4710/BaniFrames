@@ -56,6 +56,26 @@ function App() {
         setFavList={setFavBaniList}
         setCurrBani={setCurrBani}
       />
+      <div className="flex items-start">
+        <button
+          className="flex-1 m-10 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+          onClick={() => {
+            const baniToken = getRandomBani(baniList);
+            const { token, gurmukhiUni, ID } = getObjFromToken(baniToken.token);
+            const partitions: number[] =
+              bani_partitions[token as keyof BaniPartitions];
+            // alert("Random Bani: " + gurmukhiUni);
+            setCurrBani({
+              ID,
+              token,
+              gurmukhiUni,
+              partitions,
+            });
+          }}
+        >
+          Random Bani
+        </button>
+      </div>
     </div>
   );
 }
@@ -107,12 +127,13 @@ function BaniOpt({
   favList: BaniToken[];
   setFavList: Function;
 }) {
-  const isFav = favList.some((bani) => bani.token === obj.token);
+  const isBaniOpt = isBaniToken(obj);
   let bani_title;
   let onClickFunc;
-  const isBaniOpt = isBaniToken(obj);
+  let isFav = false;
 
   if (isBaniOpt) {
+    isFav = favList.some((bani) => bani.token === obj.token);
     const { token, gurmukhiUni, ID } = getObjFromToken(obj.token);
     bani_title = gurmukhiUni;
     if (!(token in bani_partitions)) {
@@ -213,12 +234,14 @@ function isBaniToken(obj: BaniGroup | BaniToken): obj is BaniToken {
   return (obj as BaniToken).token !== undefined;
 }
 
-function baniInFavorites(token: string) {
-  const favs = localStorage.getItem("bani_favorites"); //string
-  if (favs === null) {
-    return false;
+function getRandomBani(allBanis: BaniDisplayOrder): BaniToken {
+  const randIdx = Math.floor(Math.random() * allBanis.length);
+  const baniGroup = allBanis[randIdx] as BaniGroup | BaniToken;
+  if (isBaniToken(baniGroup)) {
+    return baniGroup;
   }
-  return favs.includes(token);
+  const randomBaniIdx = Math.floor(Math.random() * baniGroup.banis.length);
+  return baniGroup.banis[randomBaniIdx];
 }
 
 export default App;

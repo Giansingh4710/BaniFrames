@@ -1980,7 +1980,7 @@ const bani_partitions = {
   ],
 
   // savyie
-  sirimukhbaakm1a: [0, 15, 20, 25, 31, 37, 43, 49],
+  sirimukhbaakm1a: [0, 10, 15, 20, 25, 31, 37, 43, 49],
   sirimukhbaakm1b: [0, 9, 15, 21, 27, 35, 43, 49, 55, 61, 66],
   svaiyem1: [0, 6, 10, 14, 18, 22, 28, 34, 40, 46],
   svaiyem2: [0, 8, 12, 16, 20, 26, 32, 38, 42, 46],
