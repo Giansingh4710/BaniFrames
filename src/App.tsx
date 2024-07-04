@@ -62,9 +62,12 @@ function App() {
           onClick={() => {
             const baniToken = getRandomBani(baniList);
             const { token, gurmukhiUni, ID } = getObjFromToken(baniToken.token);
-            const partitions: number[] =
-              bani_partitions[token as keyof BaniPartitions];
-            // alert("Random Bani: " + gurmukhiUni);
+            console.log("Random Bani: " + gurmukhiUni);
+            let partitions: number[] = bani_partitions[token as keyof BaniPartitions];
+            if (!(token in bani_partitions)) {
+              console.log(gurmukhiUni + " is not fully optimized.");
+              partitions = [0];
+            }
             setCurrBani({
               ID,
               token,
@@ -136,11 +139,15 @@ function BaniOpt({
     isFav = favList.some((bani) => bani.token === obj.token);
     const { token, gurmukhiUni, ID } = getObjFromToken(obj.token);
     bani_title = gurmukhiUni;
+    let partitions: number[] = bani_partitions[token as keyof BaniPartitions];
     if (!(token in bani_partitions)) {
-      return;
+      partitions = [0];
     }
-    const partitions: number[] = bani_partitions[token as keyof BaniPartitions];
     onClickFunc = () => {
+
+      if (!(token in bani_partitions)) {
+        console.log(gurmukhiUni + " is not fully optimized");
+      }
       setCurrBani({
         ID,
         token,

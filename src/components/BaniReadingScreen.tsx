@@ -118,19 +118,19 @@ function BaniText({
   currPartitionIdx: number;
   setCurrPartitionIdx: Function;
 }) {
+  const [gurmukhiOn, setGurmukhiOn] = useState(true);
+  const [translationsOn, setTranslations] = useState(false);
   const [larivaarOn, setLarivaarOn] = useState(true);
   const [toggleLineLarivaar, setLineLarivaar] = useState({
     larivaarOff: false,
     verseIdx: -1,
   });
-  const [translationsOn, setTranslations] = useState(false);
 
   const [fontSize, setFontSize] = useState<number>(18); // Initial font size
   const [selectedFont, setFont] = useState<string>(fonts[0]);
   const [unicodeOn, setUnicode] = useState<boolean>(false);
 
   const baniViewDiv = useRef<HTMLDivElement>(null);
-  // const baniViewDiv = useRef();
   const scrollTo = useRef(0);
 
   let last_paragraph = -1;
@@ -189,7 +189,6 @@ function BaniText({
       <div
         ref={baniViewDiv}
         className="text-white mx-2 my-1 p-2 h-[70vh] overflow-auto border border-sky-500 rounded text-wrap"
-        style={{ fontSize: `${fontSize}px` }}
       >
         {verses.map((obj: Verse, idx: number) => {
           const paragraph = obj.paragraph;
@@ -231,30 +230,44 @@ function BaniText({
                   <br />
                 </div>
               )}
-              <p
-                style={{ fontFamily: selectedFont }}
-                onClick={() => {
-                  if (baniViewDiv.current?.scrollTop) {
-                    scrollTo.current = baniViewDiv.current.scrollTop;
-                  }
+              {gurmukhiOn && (
+                <p
+                  style={{
+                    fontFamily: selectedFont,
+                    fontSize: `${fontSize}px`,
+                  }}
+                  onClick={() => {
+                    if (baniViewDiv.current?.scrollTop) {
+                      scrollTo.current = baniViewDiv.current.scrollTop;
+                    }
 
-                  let larivaarOff = larivaarOn; // Default
-                  if (toggleLineLarivaar.verseIdx === idx) {
-                    larivaarOff = !toggleLineLarivaar.larivaarOff;
-                  }
-                  setLineLarivaar({
-                    larivaarOff: larivaarOff,
-                    verseIdx: idx,
-                  });
-                }}
-                onDoubleClick={() => {
-                  console.log(translation);
-                  alert(translation);
-                }}
-              >
-                {line}
-              </p>
-              {translationsOn && <p>{translation}</p>}
+                    let larivaarOff = larivaarOn; // Default
+                    if (toggleLineLarivaar.verseIdx === idx) {
+                      larivaarOff = !toggleLineLarivaar.larivaarOff;
+                    }
+                    setLineLarivaar({
+                      larivaarOff: larivaarOff,
+                      verseIdx: idx,
+                    });
+                  }}
+                  onDoubleClick={() => {
+                    console.log(translation);
+                    alert(translation);
+                  }}
+                >
+                  {line}
+                </p>
+              )}
+              {translationsOn && (
+                <p
+                  style={{
+                    fontFamily: "Gill Sans, sans-serif",
+                    fontSize: `${fontSize - 7}px`,
+                  }}
+                >
+                  {translation}
+                </p>
+              )}
             </span>
           );
         })}
@@ -307,10 +320,12 @@ function BaniText({
   }, [fontSize]);
 
   const ButtomButtons = () => {
+    const middleBtnsStyle = "text-xs px-2 flex-1 basis-1/3 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200"
+    const leftRightStyle = "text-xs px-4 py-1 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
     return (
-      <div className="p-2 flex flex-row justify-around gap-1 text-xs">
+      <div className="w-fit  flex flex-row justify-around gap-1">
         <button
-          className="px-4 py-1 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className={leftRightStyle}
           onClick={() => {
             if (currPartitionIdx === 0) return;
             setCurrPartitionIdx(currPartitionIdx - 1);
@@ -319,20 +334,46 @@ function BaniText({
         >
           <IoArrowBack size={30} />
         </button>
+        <div className="basis-1/3 flex items-center">
+          <button
+            className={middleBtnsStyle}
+            onClick={() => {
+              if (baniViewDiv.current?.scrollTop) {
+                scrollTo.current = baniViewDiv.current.scrollTop;
+              }
+
+              setGurmukhiOn(!gurmukhiOn);
+            }}
+          >
+            Toggle Gurmukhi
+          </button>
+          <button
+            className={middleBtnsStyle}
+            onClick={() => {
+              if (baniViewDiv.current?.scrollTop) {
+                scrollTo.current = baniViewDiv.current.scrollTop;
+              }
+
+              setTranslations(!translationsOn);
+            }}
+          >
+            Toggle Translations
+          </button>
+          <button
+            className={middleBtnsStyle}
+            onClick={() => {
+              if (baniViewDiv.current?.scrollTop) {
+                scrollTo.current = baniViewDiv.current.scrollTop;
+              }
+
+              setLarivaarOn(!larivaarOn);
+            }}
+          >
+            Toggle Larivaar
+          </button>
+        </div>
         <button
-          className="px-4 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-          onClick={() => setTranslations(!translationsOn)}
-        >
-          Toggle Translations
-        </button>
-        <button
-          className="px-4  border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
-          onClick={() => setLarivaarOn(!larivaarOn)}
-        >
-          Toggle Larivaar
-        </button>
-        <button
-          className="px-4 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className={leftRightStyle}
           onClick={() => {
             if (currPartitionIdx + 1 === partitions.length) return;
             setCurrPartitionIdx(currPartitionIdx + 1);
