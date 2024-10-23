@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { BaniApiData, Verse } from "../assets/bani_api_type.ts";
-import {
-  ALL_BANIS_DATA,
-  Bani_Display_Order,
-  bani_partitions,
-} from "../assets/banis_data.ts";
+import React from "react";
+import { BaniApiData } from "../assets/bani_api_type.ts";
+import { ALL_BANIS_DATA, bani_partitions } from "../assets/banis_data.ts";
 
-import { BaniPartitions, BaniInfo } from "../assets/types.ts";
+import {
+  BaniPartitions,
+  BaniInfo,
+  TransliterationType,
+} from "../assets/types.ts";
 import Header from "./Header.tsx";
 
 interface PartitionScreenProps {
@@ -15,15 +15,16 @@ interface PartitionScreenProps {
 export default function ShowBani({
   setShowPartitionScreen,
 }: PartitionScreenProps) {
-  const [allBaniIdx, setAllBaniIdx] = useState(-1);
+  const [allBaniIdx, setAllBaniIdx] = React.useState(-1);
   const currentBani = ALL_BANIS_DATA[allBaniIdx];
-  const [bani_data, setBaniData] = useState<BaniApiData>();
+  const [bani_data, setBaniData] = React.useState<BaniApiData>();
 
   return (
     <div className="h-svh bg-gray-800 text-white p-4">
       <Header
         title={"Find the Index Number of Line in a Bani to Make Partitions"}
         onBackClick={() => setShowPartitionScreen(false)}
+        rightComponent={() => null}
       />
 
       <select
@@ -57,7 +58,7 @@ interface AllTheLinesProps {
   currentBani: BaniInfo;
 }
 function ShowLines({ bani_data, currentBani }: AllTheLinesProps) {
-  const [showLines, setShowLines] = useState(true);
+  const [showLines, setShowLines] = React.useState(true);
   if (bani_data === undefined || currentBani === undefined) return null;
   return (
     <div className="bg-gray-700 p-4 rounded mt-4 space-y-2">
@@ -88,7 +89,7 @@ function ShowLines({ bani_data, currentBani }: AllTheLinesProps) {
 }
 
 function AllTheLines({ bani_data }: { bani_data?: BaniApiData }) {
-  const [isReversed, setIsReversed] = useState(false);
+  const [isReversed, setIsReversed] = React.useState(false);
   const lines = [];
   if (!bani_data) return null;
   if (isReversed) {
@@ -159,8 +160,11 @@ function ThePartions({ bani_data, currentBani }: AllTheLinesProps) {
 }
 
 function ShowDetails({ currentBani }: { currentBani: BaniInfo }) {
-  const [detailsShow, setDetailsShow] = useState(false);
+  const [detailsShow, setDetailsShow] = React.useState(false);
   if (currentBani === undefined) return null;
+
+  type BaniInfoKeys = keyof BaniInfo;
+  type translitKeys = keyof TransliterationType;
   return (
     <>
       <button
@@ -173,16 +177,19 @@ function ShowDetails({ currentBani }: { currentBani: BaniInfo }) {
         <div className="bg-gray-700 p-4 rounded mt-4">
           <h4 className="font-semibold text-sm mb-2">Details:</h4>
           <ul className="list-none">
-            {Object.keys(currentBani).map((key) => (
+            {(Object.keys(currentBani) as BaniInfoKeys[]).map((key) => (
               <li key={key} className="mb-1">
                 <span className="font-bold text-blue-300">{key}:</span>{" "}
-                {typeof currentBani[key] === "object" ? (
-                  // If the value is an object, render its keys and values
+                {key === "transliterations" ? (
                   <ul className="ml-4 list-disc">
-                    {Object.keys(currentBani[key]).map((subKey) => (
+                    {(
+                      Object.keys(
+                        currentBani.transliterations,
+                      ) as translitKeys[]
+                    ).map((subKey) => (
                       <li key={subKey}>
                         <span className="font-semibold">{subKey}:</span>{" "}
-                        {currentBani[key][subKey]}
+                        {currentBani.transliterations[subKey]}
                       </li>
                     ))}
                   </ul>

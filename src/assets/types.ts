@@ -24,20 +24,22 @@ enum BaniPartitionKey {
   akalustat = "akalustat",
 }
 
+interface TransliterationType {
+  english: string;
+  hindi: string;
+  en: string;
+  hi: string;
+  ipa: string;
+  ur: string;
+}
+
 interface BaniInfo {
   ID: number;
   token: string;
   gurmukhi: string;
   gurmukhiUni: string;
   transliteration: string;
-  transliterations: {
-    english: string;
-    hindi: string;
-    en: string;
-    hi: string;
-    ipa: string;
-    ur: string;
-  };
+  transliterations: TransliterationType;
   updated: string;
 }
 
@@ -59,4 +61,5 @@ export type {
   BaniToken,
   BaniGroup,
   BaniDisplayOrder,
+  TransliterationType,
 };
