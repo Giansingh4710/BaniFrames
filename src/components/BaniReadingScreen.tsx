@@ -21,13 +21,11 @@ const fonts = [
   "adhiapakextralight",
 ];
 
-function ShowBani({
-  currBani,
-  goBack,
-}: {
+interface Props {
   currBani: CurrentBani;
   goBack: Function;
-}) {
+}
+function ShowBani({ currBani, goBack }: Props) {
   const [bani_data, setBaniData] = useState<BaniApiData>();
   const [currPartitionIdx, setCurrPartitionIdx] = useState<number>(0);
   const partitions = currBani.partitions;
@@ -320,8 +318,10 @@ function BaniText({
   }, [fontSize]);
 
   const ButtomButtons = () => {
-    const middleBtnsStyle = "text-xs px-2 flex-1 basis-1/3 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200"
-    const leftRightStyle = "text-xs px-4 py-1 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300"
+    const middleBtnsStyle =
+      "text-xs px-2 flex-1 basis-1/3 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200";
+    const leftRightStyle =
+      "text-xs px-4 py-1 border border-sky-500 rounded bg-white text-sky-500 cursor-pointer transition duration-300 hover:bg-sky-100 active:bg-sky-200 active:shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300";
     return (
       <div className="w-fit  flex flex-row justify-around gap-1">
         <button

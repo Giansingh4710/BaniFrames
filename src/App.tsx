@@ -14,6 +14,7 @@ import {
 } from "./assets/types.ts";
 import Header from "./components/Header.tsx";
 import ShowBani from "./components/BaniReadingScreen.tsx";
+import PartitionScreen from "./components/PartitionScreen.tsx";
 
 import { FaRegStar } from "react-icons/fa";
 import { FaStar } from "react-icons/fa"; //filled star
@@ -22,6 +23,8 @@ function App() {
   const [currBani, setCurrBani] = useState<CurrentBani | undefined>();
   const [baniList, setBaniList] =
     useState<BaniDisplayOrder>(Bani_Display_Order);
+  const [showPartitionScreen, setShowPartitionScreen] =
+    useState<boolean>(false);
 
   const [favBaniList, setFavBaniList] = useState<BaniToken[]>(getFavBanis());
   useMemo(() => {
@@ -32,10 +35,14 @@ function App() {
     return (
       <ShowBani currBani={currBani} goBack={() => setCurrBani(undefined)} />
     );
+  }else if (showPartitionScreen) {
+    return (
+      <PartitionScreen setShowPartitionScreen={setShowPartitionScreen}/>
+    );
   }
 
   return (
-    <div className="h-svh bg-gray-800">
+    <div className="h-full bg-gray-800">
       <Header
         title="Bani Frames"
         onBackClick={() => {
@@ -63,7 +70,8 @@ function App() {
             const baniToken = getRandomBani(baniList);
             const { token, gurmukhiUni, ID } = getObjFromToken(baniToken.token);
             console.log("Random Bani: " + gurmukhiUni);
-            let partitions: number[] = bani_partitions[token as keyof BaniPartitions];
+            let partitions: number[] =
+              bani_partitions[token as keyof BaniPartitions];
             if (!(token in bani_partitions)) {
               console.log(gurmukhiUni + " is not fully optimized.");
               partitions = [0];
@@ -79,6 +87,12 @@ function App() {
           Random Bani
         </button>
       </div>
+      <button
+        className="m-10 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+        onClick={() => setShowPartitionScreen(true)}
+      >
+        Show Bani Indexes For Partitions
+      </button>
     </div>
   );
 }
@@ -101,6 +115,7 @@ function BanisList({
       <div className="m-10 flex flex-col overflow-auto bg-gray-600 p-4 space-y-2 rounded-lg">
         {baniList.map((obj: BaniGroup | BaniToken, idx: number) => (
           <BaniOpt
+            key={idx}
             obj={obj}
             idx={idx}
             setCurrBani={setCurrBani}
@@ -144,7 +159,6 @@ function BaniOpt({
       partitions = [0];
     }
     onClickFunc = () => {
-
       if (!(token in bani_partitions)) {
         console.log(gurmukhiUni + " is not fully optimized");
       }
